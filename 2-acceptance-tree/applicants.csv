@@ -1,0 +1,14 @@
+No.,GPA,University,Published,Recommendation,Class
+1,4,rank 1,yes,good,P
+2,3.9,rank 1,no,good,P
+2,3.9,rank 1,no,good,P
+3,3.9,rank 2,no,normal,P
+4,3.8,rank 1,yes,good,P
+5,3.6,rank 2,no,good,P
+6,3.6,rank 3,yes,good,P
+7,3.4,rank 3,no,good,N
+8,3.4,rank 1,no,good,N
+9,3.2,rank 2,yes,normal,N
+10,3.1,rank 1,no,normal,N
+11,3.1,rank 3,yes,normal,N
+12,3,rank 3,no,good,N
