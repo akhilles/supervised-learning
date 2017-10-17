@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 from math import log2
+from treelib import Node, Tree
+
+tree = Tree()
 
 def applicant_data(filename):
     df = pd.read_csv(filename)
@@ -26,24 +29,51 @@ def entropy(q):
 
 def information_gain(attr, df):
     gain = 0.0
-    grouping = df.groupby('Class')['Class'].count()
-    n = grouping['N']
-    p = grouping['P']
+    n = len(df[df['Class'] == 'N'])
+    p = len(df[df['Class'] == 'P'])
     gain += entropy(n/(n+p))
 
-    pt = df.pivot_table(index=attr, columns='Class', values='GPA', aggfunc='count', fill_value=0)
-
-    for idx, row in pt.iterrows():
-        ni = row['N']
-        pi = row['P']
+    for val in df[attr].unique():
+        ni = len(df[(df[attr] == val) & (df['Class'] == 'N')])
+        pi = len(df[(df[attr] == val) & (df['Class'] == 'P')])
         weight = (ni+pi)/(n+p)
         gain -= weight*entropy(ni/(ni+pi))
 
     return gain
 
+def build_tree(df, parent, label):
+    column_names = list(df)
+    column_names.remove('Class')
+    column_names.remove('GPA')
+    new_label = parent + ' (' + label + ') - '
+    printable = ' (' + label + ')'
+    
+    if len(column_names) == 0 or len(df) == 0:
+        return
+    
+    if len(df[df['Class'] == 'N']) == 0:
+        tree.create_node('P' + printable, new_label + 'P', parent=parent)
+        return
+    elif len(df[df['Class'] == 'P']) == 0:
+        tree.create_node('N' + printable, new_label + 'N', parent=parent)
+        return
+
+    info_gains = [information_gain(attr, df) for attr in column_names]
+    best_attr = column_names[info_gains.index(max(info_gains))]
+
+    if parent == 'root':
+        tree.create_node(best_attr, new_label + best_attr)
+    else:
+        tree.create_node(best_attr + printable, new_label + best_attr, parent=parent)
+
+    index = 1
+    for val in df[best_attr].unique():
+        df_new = df[df[best_attr] == val].drop(best_attr, 1)
+        build_tree(df_new, new_label + best_attr, val)
+        index += 1
+        
+
 df = applicant_data('applicants.csv')
-print(df)
-print(information_gain('GPA Class', df))
-print(information_gain('University', df))
-#print(df.pivot_table(index='GPA Class', columns='Class', values='GPA', aggfunc='count').head())
-#print(entropy(0.01))
+
+build_tree(df, 'root', '')
+print(tree)
