@@ -3,11 +3,13 @@
 
 import mostFrequent
 import perceptron
+import numceptron
 import svm
 import mlp
 import samples
 import sys
 import util
+import numpy as np
 
 TRAINING_SET_SIZE = 5000
 TEST_SET_SIZE = 1000
@@ -29,6 +31,45 @@ def basicFeatureExtractorDigit(datum):
       else:
         features[(x,y)] = 0
   return features
+
+def numpyFeatureExtractorDigit(datum):
+  """
+  Returns a set of pixel features indicating whether
+  each pixel in the provided datum is white (0) or gray/black (1)
+  """
+  a = datum.getPixels()
+
+  features = np.zeros((DIGIT_DATUM_HEIGHT, DIGIT_DATUM_WIDTH), dtype=int)
+  for x in range(DIGIT_DATUM_WIDTH):
+    for y in range(DIGIT_DATUM_HEIGHT):
+      if datum.getPixel(x, y) > 0:
+        features[x,y] = 1
+      else:
+        features[x,y] = 0
+  return features.flatten()
+
+def getNumpyData(numTraining, numTest):
+  featureFunction = numpyFeatureExtractorDigit
+
+  rawTrainingData = samples.loadDataFile("data/digitdata/trainingimages", numTraining, DIGIT_DATUM_WIDTH,
+                                         DIGIT_DATUM_HEIGHT)
+  trainingLabels = samples.loadLabelsFile("data/digitdata/traininglabels", numTraining)
+  rawValidationData = samples.loadDataFile("data/digitdata/validationimages", numTest, DIGIT_DATUM_WIDTH,
+                                           DIGIT_DATUM_HEIGHT)
+  validationLabels = samples.loadLabelsFile("data/digitdata/validationlabels", numTest)
+  rawTestData = samples.loadDataFile("data/digitdata/testimages", numTest, DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT)
+  testLabels = samples.loadLabelsFile("data/digitdata/testlabels", numTest)
+
+  # Extract features
+  print "Extracting features..."
+  trainingData = np.array(map(featureFunction, rawTrainingData))
+  validationData = np.array(map(featureFunction, rawValidationData))
+  testData = np.array(map(featureFunction, rawTestData))
+  validationLabels = np.array(validationLabels)
+  testLabels = np.array(testLabels)
+  trainingLabels = np.array(trainingLabels)
+
+  return (trainingData, validationData, testData, trainingLabels, validationLabels, testLabels)
 
 def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage):
   """
@@ -100,7 +141,7 @@ def readCommand( argv ):
   from optparse import OptionParser  
   parser = OptionParser(USAGE_STRING)
   
-  parser.add_option('-c', '--classifier', help=default('The type of classifier'), choices=['mostFrequent', 'perceptron', 'mlp', 'svm'], default='mostFrequent')
+  parser.add_option('-c', '--classifier', help=default('The type of classifier'), choices=['mostFrequent', 'perceptron', 'mlp', 'svm', 'numceptron'], default='mostFrequent')
   parser.add_option('-t', '--training', help=default('The size of the training set'), default=TRAINING_SET_SIZE, type="int")
   parser.add_option('-w', '--weights', help=default('Whether to print weights'), default=False, action="store_true")
   parser.add_option('-i', '--iterations', help=default("Maximum iterations to run training"), default=3, type="int")
@@ -131,6 +172,8 @@ def readCommand( argv ):
     classifier = mlp.MLPClassifier(legalLabels,options.iterations)
   elif(options.classifier == "perceptron"):
     classifier = perceptron.PerceptronClassifier(legalLabels,options.iterations)
+  elif (options.classifier == "numceptron"):
+    classifier = numceptron.numceptronClassifier(legalLabels, options.iterations)
   elif(options.classifier == "svm"):
     classifier = svm.SVMClassifier(legalLabels)
   else:
@@ -168,18 +211,24 @@ def runClassifier(args, options):
   numTraining = options.training
   numTest = options.test
 
-  rawTrainingData = samples.loadDataFile("data/digitdata/trainingimages", numTraining,DIGIT_DATUM_WIDTH,DIGIT_DATUM_HEIGHT)
+  rawTrainingData = samples.loadDataFile("data/digitdata/trainingimages", numTraining, DIGIT_DATUM_WIDTH,
+                                         DIGIT_DATUM_HEIGHT)
   trainingLabels = samples.loadLabelsFile("data/digitdata/traininglabels", numTraining)
-  rawValidationData = samples.loadDataFile("data/digitdata/validationimages", numTest,DIGIT_DATUM_WIDTH,DIGIT_DATUM_HEIGHT)
+  rawValidationData = samples.loadDataFile("data/digitdata/validationimages", numTest, DIGIT_DATUM_WIDTH,
+                                           DIGIT_DATUM_HEIGHT)
   validationLabels = samples.loadLabelsFile("data/digitdata/validationlabels", numTest)
-  rawTestData = samples.loadDataFile("data/digitdata/testimages", numTest,DIGIT_DATUM_WIDTH,DIGIT_DATUM_HEIGHT)
+  rawTestData = samples.loadDataFile("data/digitdata/testimages", numTest, DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT)
   testLabels = samples.loadLabelsFile("data/digitdata/testlabels", numTest)
-    
-  # Extract features
-  print "Extracting features..."
-  trainingData = map(featureFunction, rawTrainingData)
-  validationData = map(featureFunction, rawValidationData)
-  testData = map(featureFunction, rawTestData)
+
+
+  if(classifier.type == 'numceptron'):
+    trainingData, validationData, testData, trainingLabels, validationLabels, testLabels = getNumpyData(numTraining, numTest)
+  else:
+    # Extract features
+    print "Extracting features..."
+    trainingData = map(featureFunction, rawTrainingData)
+    validationData = map(featureFunction, rawValidationData)
+    testData = map(featureFunction, rawTestData)
   
   # Conduct training and testing
   print "Training..."
@@ -194,7 +243,7 @@ def runClassifier(args, options):
   print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels))
   analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
 
-  if((options.weights) & (options.classifier == "perceptron")):
+  if((options.weights) & (options.classifier == "perceptron" or options.classifier == 'numceptron')):
     for l in classifier.legalLabels:
       features_weights = classifier.findHighWeightFeatures(l)
       print ("=== Features with high weight for label %d ==="%l)
