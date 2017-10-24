@@ -24,3 +24,39 @@ GPA Class
         ├── N (rank 3)
         └── P (rank 2)
 ```
+
+### c)
+The tree generated in part b is equivalent to the tree provided but this is a coincidence.
+
+
+## Question 3
+Code is provided in `3-svm/svm.py`.
+
+### a)
+![](3-svm/plot.png)
+
+### b)
+w = [1 1]<sup>T</sup>  
+b = -4
+
+### c)
+(no change)  
+w = [1 1]<sup>T</sup>  
+b = -4
+
+![](3-svm/plot_new.png)
+
+
+## Question 4
+Code is provided in `4-perceptron-learning/perceptron-learning.py`.
+
+### a)
+![](4-perceptron-learning/perceptron_2d.png)
+
+### b)
+Perceptron did reach a perfect classification.
+
+### c)
+w = [0.200 -0.306]<sup>T</sup>  
+error (proportion of misclassified samples) = 25%
+![](4-perceptron-learning/perceptron_1d.png)

@@ -81,3 +81,4 @@ plt.axis([0,1,-0.2,0.2])
 plt.plot(df_pos['X'],df_pos['Y'],'k.',df_neg['X'],df_neg['Y'],'r.')
 
 plt.show()
+print(w)
