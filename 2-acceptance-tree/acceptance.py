@@ -59,7 +59,12 @@ def build_tree(df, parent, label):
         return
 
     info_gains = [information_gain(attr, df) for attr in column_names]
+    print(column_names)
+    print(info_gains)
+    
     best_attr = column_names[info_gains.index(max(info_gains))]
+    print('Best attribute:', best_attr)
+    print()
 
     if parent == 'root':
         tree.create_node(best_attr, new_label + best_attr)
@@ -75,5 +80,6 @@ def build_tree(df, parent, label):
 
 df = applicant_data('applicants.csv')
 
+print('Information gain:\n')
 build_tree(df, 'root', '')
 print(tree)
