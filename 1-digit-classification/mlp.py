@@ -25,7 +25,7 @@ class MLPClassifier:
     self.params['b2'] = np.zeros(self.output)
       
   def train( self, trainingData, trainingLabels, validationData, validationLabels,learning_rate=1,
-            reg=1e-4, decay = 0.99, batch = True, batch_size = 200):
+            reg=1e-5, decay = 0.99, batch = True, batch_size = 200):
 
     X = trainingData
     y = trainingLabels
