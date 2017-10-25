@@ -10,6 +10,7 @@ import samples
 import sys
 import util
 import numpy as np
+import matplotlib.pyplot as plt
 
 TRAINING_SET_SIZE = 5000
 TEST_SET_SIZE = 1000
@@ -221,7 +222,7 @@ def runClassifier(args, options):
   testLabels = samples.loadLabelsFile("data/digitdata/testlabels", numTest)
 
 
-  if(classifier.type == 'numceptron'):
+  if(classifier.type == 'numceptron' or classifier.type == 'mlp' or classifier.type == 'svm'):
     trainingData, validationData, testData, trainingLabels, validationLabels, testLabels = getNumpyData(numTraining, numTest)
   else:
     # Extract features
@@ -249,8 +250,72 @@ def runClassifier(args, options):
       print ("=== Features with high weight for label %d ==="%l)
       printImage(features_weights)
 
+def q3():
+  trainingData, validationData, testData, trainingLabels, validationLabels, testLabels = getNumpyData(5000,
+                                                                                                      1000)
+  full_size = 5000
+  percents = np.linspace(.1,1,10)
+  print(percents)
+  classes = range(10)
+
+  data = {'svm':[],'numceptron':[],'mlp':[]}
+
+  for i in percents:
+    size = int(i*full_size)
+    X = trainingData[0:size]
+    y = trainingLabels[0:size]
+    models = [svm.SVMClassifier(classes), numceptron.numceptronClassifier(classes, 20), mlp.MLPClassifier(classes, 500, 200)]
+
+    for j,m in enumerate(models):
+      m.train(X,y, validationData, validationLabels)
+      pred = m.classify(trainingData)
+      acc = 1.0*np.sum(pred==trainingLabels)/full_size
+      data[m.type].append(acc)
+      print('{}: {}  acc: {}'.format(j, m.type, acc))
+
+  for key in data.keys():
+    plt.figure()
+    plt.plot(percents, data[key])
+    plt.ylabel('Accuracy on training set')
+    plt.xlabel('Percent of training set used')
+    plt.title('{} performance on training set'.format(key))
+    plt.savefig('data/{}_train.png'.format(key))
+
+  print(data)
+
+def q4():
+  trainingData, validationData, testData, trainingLabels, validationLabels, testLabels = getNumpyData(5000,
+                                                                                                      1000)
+  full_size = 5000
+  percents = np.linspace(.1, 1, 10)
+  print(percents)
+  classes = range(10)
+  data = {'svm': [], 'numceptron': [], 'mlp': []}
+  for i in percents:
+    size = int(i * full_size)
+    X = trainingData[0:size]
+    y = trainingLabels[0:size]
+    models = [svm.SVMClassifier(classes), numceptron.numceptronClassifier(classes, 20),
+              mlp.MLPClassifier(classes, 1000, 200)]
+    for j, m in enumerate(models):
+      m.train(X, y, validationData, validationLabels)
+      pred = m.classify(testData)
+      acc = 1.0 * np.sum(pred == testLabels) / len(testLabels)
+      data[m.type].append(acc)
+      print('{}: {}  acc: {}'.format(j, m.type, acc))
+  for key in data.keys():
+    plt.figure()
+    plt.plot(percents, data[key])
+    plt.ylabel('Accuracy on test set')
+    plt.xlabel('Percent of training set used')
+    plt.title('{} performance on test set'.format(key))
+    plt.savefig('data/{}_test.png'.format(key))
+  print(data)
+
 if __name__ == '__main__':
-  # Read input
-  args, options = readCommand( sys.argv[1:] ) 
-  # Run classifier
-  runClassifier(args, options)
+  # # Read input
+  # args, options = readCommand( sys.argv[1:] )
+  # # Run classifier
+  # runClassifier(args, options)
+  # q3()
+  q4()

@@ -65,13 +65,14 @@ class numceptronClassifier:
         return featuresWeights
 
 if __name__ == '__main__':
+    pass
     # print(getNumpyData(10,3)[1].shape)
-    train, val, test, trainLabels, valLabels, testLabels = getNumpyData(2000,100)
-    c = numceptronClassifier(range(10), 1)
-    c.train(train,trainLabels, val, valLabels)
-
-    guess = c.classify(val)
-    print('Val Accuracy:{}'.format(1.0 * np.sum(guess == valLabels) / len(valLabels)))
-    guess = c.classify(test)
-    print('Test Accuracy:{}'.format(1.0*np.sum(guess==testLabels)/len(testLabels)))
+    # train, val, test, trainLabels, valLabels, testLabels = getNumpyData(2000,500)
+    # c = numceptronClassifier(range(10), 1)
+    # c.train(train,trainLabels, val, valLabels)
+    #
+    # guess = c.classify(val)
+    # print('Val Accuracy:{}'.format(1.0 * np.sum(guess == valLabels) / len(valLabels)))
+    # guess = c.classify(test)
+    # print('Test Accuracy:{}'.format(1.0*np.sum(guess==testLabels)/len(testLabels)))
 
