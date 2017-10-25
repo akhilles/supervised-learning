@@ -308,6 +308,7 @@ def q4():
     plt.plot(percents, data[key])
     plt.ylabel('Accuracy on test set')
     plt.xlabel('Percent of training set used')
+    plt.ylim((0,1))
     plt.title('{} performance on test set'.format(key))
     plt.savefig('data/{}_test.png'.format(key))
   print(data)
@@ -317,5 +318,5 @@ if __name__ == '__main__':
   # args, options = readCommand( sys.argv[1:] )
   # # Run classifier
   # runClassifier(args, options)
-  # q3()
+  q3()
   q4()
